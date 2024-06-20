@@ -10,8 +10,7 @@ from datetime import datetime  # Import datetime class from datetime module
 
 
 def main():
-    # Load config from a .env file:
-    load_dotenv()
+    load_dotenv()  # Load config from a .env file:
     
     try:
         # mongodb_uri = os.environ['MONGODB_URI_LOCAL']
@@ -21,23 +20,23 @@ def main():
         print("Error: environment variable is not set.", e)
         exit(1)
     
-    # Connect to your MongoDB cluster:
-    client = MongoClient(mongodb_uri)
-    
+    client = MongoClient(mongodb_uri)  # Connect to  MongoDB cluster
     print('database_names:')
     list_databases(client)
     
-    # Get a reference to the 'sample_mflix' database:
-    db = client['sample_mflix']
+    db = client['sample_mflix']  # Get 'sample_mflix' database
     print(f"{db.name} collections:")
     list_collections(db)
     
-    # Get a reference to the 'movies' collection:
-    collection = db['movies']
+    collection = db['movies']  # Get 'movies' collection
     
     # Get the document with the title 'Blacksmith Scene':
-    pprint(collection.find_one({'title': 'The Great Train Robbery'}))
-    
+    title = 'The Great Train Robbery'
+    print(f"Find {title}:")
+    pprint(collection.find_one({'title': title}))
+    print()
+
+    # insert a new document
     document = {
         "title": "Parasite",
         "year": 2020,
@@ -46,11 +45,38 @@ def main():
         "released": datetime(2020, 2, 7, 0, 0, 0),
      }
     
-    document_id = insert_document(collection, document)
-    print(f"_id of inserted document: {document_id}")
+    # print('insert document:')
+    # document_id = insert_document(collection, document)
+    # print(f"_id of inserted document: {document_id}\n")
+    #
+    # # Look up the document you just created in the collection:
+    # print(f"Get document with id: {document_id}\n")
+    # print(collection.find_one({'_id': bson.ObjectId(document_id)}))
+
+    # Look up the documents you've created in the collection:
+    title = 'Parasite'
+    print(f"Get documents with title: {title}\n")
+    for doc in collection.find({"title": title}):
+        pprint(doc)
+
+    for doc in collection.find({
+        'year': {'$lt': 1920},
+        'genres': 'Romance'
+    }):
+        pprint(doc)
+
+    # Update *all* the Parasite movie docs to the correct year:
+    update_result = collection.update_many({"title": "Parasite"}, {"$set": {"year": 2019}})
+
+    # collection.delete_one(
+    #     {"title": "Parasite"}
+    # )
+
+    # Count all documents in the collection
+    document_count = collection.count_documents({"title": "Parasite"})
     
-    # Look up the document you just created in the collection:
-    print(collection.find_one({'_id': bson.ObjectId(document_id)}))
+    # Print the count
+    print(f'Total Parasite documents in the movies: {document_count}')
     
 
 def list_databases(client):
@@ -76,10 +102,6 @@ def insert_document(collection, document):
     document_id = insert_result.inserted_id
     return document_id
     
-    # # Look up the documents you've created in the collection:
-    # for doc in movies.find({"title": "Parasite"}):
-    #     pprint(doc)
-    #   
     # # Update the document with the correct year:
     # update_result = movies.update_one({ '_id': parasite_id }, {
     #    '$set': {"year": 2019}
@@ -94,12 +116,6 @@ def insert_document(collection, document):
     #     {"title": "Parasite",}
     #  )
     
-    # # Count all documents in the collection
-    # document_count = movies.count_documents({"title": "Parasite"})
-    # 
-    # # Print the count
-    # print(f'Total documents in the movies: {document_count}')
-    # 
 
 
 if __name__ == '__main__':
