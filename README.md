@@ -5,7 +5,7 @@ yay -S mongodb-bin
 sudo systemctl status mongodb
 sudo systemctl start mongodb
 sudo systemctl enable mongodb  # start on boot
-mongosh  $ mongo shell
+mongosh  $
 
 
 To create a MongoDB user account with administrator access [5]:
@@ -20,6 +20,8 @@ db.createUser(
     roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
   }
 )
+
+mongosh "mongodb://rich:reddmon@localhost:27017"
 
 mongosh
 Current Mongosh Log ID: 6671cf85da8f3b4261a26a12
