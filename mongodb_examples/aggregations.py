@@ -1,41 +1,29 @@
 import datetime
-import os
+import pprint
 
 from mongo_utils import get_mongo_client, get_database_names, list_collections, list_database_names
 
 
-def run(client):
+def run(client, uri):
     try:
-        print('client databases:')
+        print(f"{uri} databases:")
         list_database_names(client)
-        
         database_names = get_database_names(client)
         
+        # Print all databases in the client
         for database_name in database_names:
-            print('database_name:', database_name)
-            if database_name in ['config', 'local']:
-                print('* skipping', database_name)
-                continue
             print(f"{database_name} collections:")
             db = client[database_name]
             list_collections(db)
-            print(f"{database_name} collection names:")
-            collection_names = db.list_collection_names()
-            print(collection_names)
             
-            # # show documents in each collection
-            # for collection_name in collection_names:
-            #     print(f"{collection_name} documents:")
-            #     cursor = db[collection_name].find()
-            #     for document in cursor:
-            #         print(document)
-        # print(f"collection: {collection}")
-        # #print(dir(collection))
-        # print(f"collection.name: {collection.name}")
-        # 
-        # for doc in collection.find():
-        #     print(doc)
-            
+            # show documents in each collection
+            for collection_name in db.list_collection_names():
+                print(f"{collection_name} documents:")
+                documents = db[collection_name].find()
+
+                for document in documents:
+                    pprint.pprint(document)
+
         post = {
             "author": "Mike",
             "text": "My first blog post!",
