@@ -1,4 +1,5 @@
 import os
+import pprint
 
 from dotenv import load_dotenv
 from mongo_utils import get_mongo_client, list_database_names
@@ -15,7 +16,8 @@ def main():
     client_local = get_mongo_client(mongodb_uri_local)
     client_atlas = get_mongo_client(mongodb_uri_atlas)
 
-    clients =[client_local]  # , client_atlas]
+    clients = \
+        [client_local]  # , client_atlas]
     
     for client in clients:
         # print("dir(client):", dir(client))

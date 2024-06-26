@@ -1,4 +1,4 @@
-import datetime   # This will be needed later
+from datetime import datetime, timezone
 import os
 import bson
 from bson import ObjectId
@@ -6,13 +6,45 @@ from bson import ObjectId
 from pprint import pprint
 from datetime import datetime  # Import datetime class from datetime module
 
-from mongo_utils import list_database_names, list_collections
+from mongo_utils import get_database_names, list_database_names, list_collections
 
 
 def run(client, uri):
     try:
         print(f"{uri} databases:")
         list_database_names(client)
+        database_names = get_database_names(client)
+        db = client['test_database']
+        collections = db.list_collection_names()
+        print(collections)
+        cursor = db['notes']  # Replace 'test_collection' with your actual collection name
+
+        print(f"cursor: {cursor}")
+        for document in cursor.find():
+            pprint(document)
+
+        # result = collection.delete_one({'_id': ObjectId('667495007d7b236c50a26a14'), 'test_key': 'test_value'})
+        # return
+        # Print all databases in the client
+        for database_name in database_names:
+            print(f"{database_name} collections:")
+            db = client[database_name]
+            list_collections(db)
+
+            # show documents in each collection
+            for collection_name in db.list_collection_names():
+                print(f"{collection_name} documents:")
+                documents = db[collection_name].find()
+
+                for document in documents:
+                    pprint(document)
+
+        post = {
+            "author": "Mike",
+            "text": "My first blog post!",
+            "tags": ["mongodb", "python", "pymongo"],
+            "date": datetime.now(tz=timezone.utc),
+        }
 
         db = client['sample_mflix']  # Get 'sample_mflix' database
         print(f"{db.name} collections:")
@@ -38,7 +70,7 @@ def run(client, uri):
         # print('insert document:')
         # document_id = insert_document(collection, document)
         # print(f"_id of inserted document: {document_id}\n")
-        # 
+        #
         # # Look up the document you just created in the collection:
         # print(f"Get document with id: {document_id}\n")
         # print(collection.find_one({'_id': bson.ObjectId(document_id)}))
