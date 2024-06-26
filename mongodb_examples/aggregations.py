@@ -1,15 +1,11 @@
 import datetime
 import os
-from pymongo import MongoClient
 
 from mongo_utils import get_mongo_client, get_database_names, list_collections, list_database_names
 
 
-def run():
+def run(client):
     try:
-        mongodb_uri = os.environ['MONGODB_URI_LOCAL']
-        # client = MongoClient("localhost", 27017)
-        client = get_mongo_client(mongodb_uri)
         print('client databases:')
         list_database_names(client)
         
@@ -27,12 +23,12 @@ def run():
             collection_names = db.list_collection_names()
             print(collection_names)
             
-            # show documents in each collection
-            for collection_name in collection_names:
-                print(f"{collection_name} documents:")
-                cursor = db[collection_name].find()
-                for document in cursor:
-                    print(document)
+            # # show documents in each collection
+            # for collection_name in collection_names:
+            #     print(f"{collection_name} documents:")
+            #     cursor = db[collection_name].find()
+            #     for document in cursor:
+            #         print(document)
         # print(f"collection: {collection}")
         # #print(dir(collection))
         # print(f"collection.name: {collection.name}")
