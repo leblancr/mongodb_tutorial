@@ -48,8 +48,8 @@ p: Q324@
 e: rkba1
 
 database user:
-rkba1
-Hiu55xZe0buUedBd
+rich 9hzGTIA1HjKra6fG
+rkba1 Hiu55xZe0buUedBd
 
 # Install MongoDB Compass from AUR
 yay -S mongodb-compass

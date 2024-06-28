@@ -16,17 +16,19 @@ def main():
     client_local = get_mongo_client(mongodb_uri_local)
     client_atlas = get_mongo_client(mongodb_uri_atlas)
 
-    clients = \
-        [client_local]  # , client_atlas]
+    clients = [client_local]  # , client_atlas]
     
     for client in clients:
         # print("dir(client):", dir(client))
-        # print("client:", client.host)
+        print("client:", client.host)
         
         if 'localhost' in str(client.host):
             uri = 'localhost'
+        elif 'atlas' in str(client.host):
+            uri = 'atlas'
         else:
-            uri = 'Atlas'
+            print(f"\n*** Unknown host: {client.host} ***")
+            return
             
         print(f"\n*** Using {uri} ***")
         

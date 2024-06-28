@@ -9,6 +9,7 @@ readme = "README.md"
 python = "^3.12"
 pymongo = "^4.7.3"
 python-dotenv = "^1.0.1"
+pymongoexplain = "^1.2.0"
 
 
 [build-system]

@@ -102,6 +102,20 @@ test = ["pytest (>=7)"]
 zstd = ["zstandard"]
 
 [[package]]
+name = "pymongoexplain"
+version = "1.2.0"
+description = "Explainable CRUD API for PyMongo"
+optional = false
+python-versions = ">=3.5"
+files = [
+    {file = "pymongoexplain-1.2.0-py3-none-any.whl", hash = "sha256:b464a4a6fbc34269e7f61f283c3bd84bb20db10c5dc2ffc954632767b8129e4f"},
+    {file = "pymongoexplain-1.2.0.tar.gz", hash = "sha256:c6a4743fd1818467f7418363e91a83c2532026869efd820e894ea9f3c32dff5a"},
+]
+
+[package.dependencies]
+pymongo = ">=3.10"
+
+[[package]]
 name = "python-dotenv"
 version = "1.0.1"
 description = "Read key-value pairs from a .env file and set them as environment variables"
@@ -118,4 +132,4 @@ cli = ["click (>=5.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "434cd9fdf26eceb57ed1cdad0a02f07e9d30a9cc26accdc6b80cc39052422daa"
+content-hash = "c306a0f3a4db414add0bfa138438ca9e4069f2aaba113675e0466caff624d9bc"
