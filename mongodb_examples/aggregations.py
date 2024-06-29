@@ -60,7 +60,7 @@ def run(client, uri):
 
                 # run each pipeline
                 for i, pipeline in enumerate(pipelines, start=1):
-                    print(f"\npipeline {i}:")
+                    print(f"\npipeline {i}, {list(pipeline[0].items())[0][0]} on {list(pipeline[0].items())[0][1]}:")
                     # pprint.pprint(list(db.things.aggregate(pipeline)))
                     # pprint.pprint(ExplainableCollection(db[collection_name]).aggregate(pipeline))
                     pprint.pprint(db.command('aggregate', 'things', pipeline=pipeline, explain=True))
