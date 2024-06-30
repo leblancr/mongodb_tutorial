@@ -1,5 +1,6 @@
 from pymongo import MongoClient
 from dotenv import load_dotenv
+from pymongo.errors import ConnectionFailure, OperationFailure
 
 import os
 import urllib.parse
@@ -15,19 +16,17 @@ def run():
     rich    9hzGTIA1HjKra6fG    readWriteAnyDatabase@admin
     rkba1   Hiu55xZe0buUedBd    atlasAdmin@admin
     """
-    try:
-        # load_dotenv()
-    
-        # mongodb_uri_local = os.environ['MONGODB_URI_LOCAL']
-        # mongodb_uri_atlas = os.environ['MONGODB_URI_ATLAS']
-        # client_local = get_mongo_client(mongodb_uri_local)
-        # client_atlas = get_mongo_client(mongodb_uri_atlas)
-        # clients = [client_local, client_atlas]
-        
-        users = {
-            'local': [
-                {
-                    'user': 'rich',
+
+    print(f"Running {__name__}.py")
+
+    # User data for connect strings
+    envs = {
+        'local': {
+            'prefix': '',
+            'server1': '@localhost:27017/',
+            'server2': '',
+            'users': {
+                'rich': {
                     'password': 'reddmon',
                     'databases': [
                         'admin',
@@ -38,11 +37,15 @@ def run():
                         'test_database'
                     ]
                 }
-            ],
-            'Atlas': [
-                {
-                    'user': 'rich',
-                    'password': 'reddmon',
+            }
+        },
+        'Atlas': {
+            'prefix': '+srv',
+            'server1': '@cluster0.yymy7y6.mongodb.net/',
+            'server2': '?retryWrites=true&w=majority&appName=Cluster0',
+            'users': {
+                'rich': {
+                    'password': '9hzGTIA1HjKra6fG',
                     'databases': [
                         'admin',
                         'aggregation_example',
@@ -50,11 +53,10 @@ def run():
                         'local',
                         'sample_mflix',
                         'test_database'
-                        ]
+                    ]
                 },
-                {
-                    'user': 'rkba1',
-                    'password': 'reddmon',
+                'rkba1': {
+                    'password': 'Hiu55xZe0buUedBd',
                     'databases': [
                         'admin',
                         'aggregation_example',
@@ -64,70 +66,65 @@ def run():
                         'test_database'
                     ]
                 }
-            ]
+            }
         }
-        
-        # Each environment (local, Atlas) has a list of user dictionaries 
-        for env in users.keys():
-            print(f"{env} users:")
+    }
+
+    try:
+        # Each environment (local, Atlas) has user dictionaries
+        for env in envs.keys():
+            # print(f"{env}:")
             
             # For each user dictionary print user
-            for user_dict in users[env]:
-                print(f"{user_dict['user']} should have access to these databases:")
-                
+            for user in envs[env]['users']:
+                # print(f"{user}:")
                 # For each user show the dictionaries they should have access to
-                for database in user_dict['databases']:
-                    print(f"  {database}")
+                for database in envs[env]['users'][user]['databases']:
+                    print(f"{user} connecting to {database}:")
+                    prefix = ''
 
-                print()
-            
-            # if 'localhost' in str(client.host):
-            #     uri = 'localhost'
-            # elif 'atlas' in str(client.host):
-            #     uri = 'atlas'
-            # else:
-            #     print(f"\n*** Unknown host: {client.host} ***")
-            #     return
-            #     
-            # print(f"*** Using {uri} client ***")
-            #     
-            # 
-            # mongodb_uri_local = os.environ['MONGODB_URI_LOCAL']
-            # mongodb_uri_atlas = os.environ['MONGODB_URI_ATLAS']
-            # 
-            # print(f"Running {__name__}.py")
-            # # admin
-            # # aggregation_example
-            # # config
-            # # local
-            # # sample_mflix
-            # # test_database
-            # 
-            # username = urllib.parse.quote_plus('rich')
-            # password = urllib.parse.quote_plus('reddmon')
-            # database = 'admin'
-            # 
-            # # Percent-Escaping
-            # # client = MongoClient('mongodb://%s:%s@127.0.0.1' % (username, password))
-            # client = MongoClient('mongodb://%s:%s@127.0.0.1/%s' % (username, password, database))
-            # 
-            # # SCRAM-SHA-256 (RFC 7677)
-            # # client = MongoClient('127.0.0.1',
-            # #                      username=username,
-            # #                      password=password,
-            # #                      authSource=database,
-            # #                      authMechanism='SCRAM-SHA-256')
-            # # 
-            # # Or through the MongoDB URI:
-            # uri = "mongodb://rich:reddmon@localhost:27017/?authSource=test_database&authMechanism=SCRAM-SHA-256"
-            # #
-            # # client = MongoClient(uri)
-            # 
-            # # Verify if the connection is successful
-            # print(client.server_info())
-            # print("Connected to MongoDB successfully!")
-            # 
-            # return client
+                    # Percent-Escaping
+                    # client = MongoClient('mongodb://%s:%s@127.0.0.1' % (username, password))
+                    # print(f"{env} prefix {envs[env]['prefix']}:")
+                    connection_string = "mongodb" + envs[env]['prefix'] + "://" + user + ":" + \
+                                        envs[env]['users'][user]['password'] + \
+                                        envs[env]['server1'] + database + envs[env]['server2']
+                    # print('connection_string:', connection_string)
+                    client = MongoClient(connection_string)
+
+                    # if 'localhost' in str(client.host):
+                    #     uri = 'localhost'
+                    # elif 'atlas' in str(client.host):
+                    #     uri = 'atlas'
+                    # else:
+                    #     print(f"\n*** Unknown host: {client.host} ***")
+                    #     return
+                    #
+                    # print(f"*** Using {uri} client ***")
+
+                    # SCRAM-SHA-256 (RFC 7677)
+                    # client = MongoClient('127.0.0.1',
+                    #                      username=username,
+                    #                      password=password,
+                    #                      authSource=database,
+                    #                      authMechanism='SCRAM-SHA-256')
+                    #
+
+
+                    # Verify if the connection is successful
+                    print(f"{user} connected to {env} {database} database successfully!")
+                    # print(client.server_info())
+
+                    # return client
+    except ConnectionFailure as cf:
+        print(f"MongoDB Connection Error: {cf}")
+        # Handle connection failure (e.g., log, retry, etc.)
+    except OperationFailure as of:
+        print(f"MongoDB Operation Error: {of}")
+        # Handle operation failure (e.g., authentication issue, permissions issue, etc.)
     except Exception as e:
         print(f"Error connecting to MongoDB: {e}")
+        # Handle other exceptions not specific to MongoDB
+    finally:
+        client.close()  # Close MongoClient instance if it was successfully created
         
