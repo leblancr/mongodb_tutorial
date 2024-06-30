@@ -23,7 +23,8 @@ def run():
     envs = {
         'local': {
             'prefix': '',
-            'server1': '@localhost:27017/',
+            'postfix': '',
+            'cluster': 'localhost:27017/',
             'server2': '',
             'users': {
                 'rich': {
@@ -41,8 +42,9 @@ def run():
         },
         'Atlas': {
             'prefix': '+srv',
-            'server1': '@cluster0.yymy7y6.mongodb.net/',
-            'server2': '?retryWrites=true&w=majority&appName=Cluster0',
+            'postfix': '?retryWrites=true&w=majority',
+            'cluster': 'cluster0.yymy7y6.mongodb.net',
+            #'server2': '?retryWrites=true&w=majority&appName=Cluster0',
             'users': {
                 'rich': {
                     'password': '9hzGTIA1HjKra6fG',
@@ -81,16 +83,17 @@ def run():
                 # For each user show the dictionaries they should have access to
                 for database in envs[env]['users'][user]['databases']:
                     print(f"{user} connecting to {database}:")
-                    prefix = ''
 
-                    # Percent-Escaping
                     # client = MongoClient('mongodb://%s:%s@127.0.0.1' % (username, password))
                     # print(f"{env} prefix {envs[env]['prefix']}:")
-                    connection_string = "mongodb" + envs[env]['prefix'] + "://" + user + ":" + \
-                                        envs[env]['users'][user]['password'] + \
-                                        envs[env]['server1'] + database + envs[env]['server2']
-                    # print('connection_string:', connection_string)
-                    client = MongoClient(connection_string)
+                    # connection_string = "mongodb" + envs[env]['prefix'] + "://" + user + ":" + \
+                    #                     envs[env]['users'][user]['password'] + \
+                    #                     envs[env]['server1'] + database + envs[env]['server2']
+                    uri = f"mongodb{envs[env]['prefix']}://{user}:{envs[env]['users'][user]['password']}"\
+                          f"@{envs[env]['cluster']}/{database}{envs[env]['postfix']}"
+
+                    print('uri:', uri)
+                    #client = MongoClient(uri)
 
                     # if 'localhost' in str(client.host):
                     #     uri = 'localhost'
@@ -126,5 +129,5 @@ def run():
         print(f"Error connecting to MongoDB: {e}")
         # Handle other exceptions not specific to MongoDB
     finally:
-        client.close()  # Close MongoClient instance if it was successfully created
+        pass #client.close()  # Close MongoClient instance if it was successfully created
         
