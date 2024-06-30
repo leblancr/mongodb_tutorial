@@ -65,3 +65,6 @@ db.createUser(
     roles: [ { role: 'root', db: 'admin' } ]
   }
 );
+
+MongoDB Connection Error: SSL handshake failed:
+add ip to atlas

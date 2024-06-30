@@ -4,121 +4,56 @@ from pymongo.errors import ConnectionFailure, OperationFailure
 
 import os
 import urllib.parse
+import basic_operations
+import aggregations
+import logging
+
+from mongo_utils import get_database_names, list_database_names, user_data
+
+# logging.basicConfig(level=logging.DEBUG)
 
 
 def run():
-    """
-    user     password    databases
-    local:
-    rich     reddmon     roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
-   
-    Atlas:
-    rich    9hzGTIA1HjKra6fG    readWriteAnyDatabase@admin
-    rkba1   Hiu55xZe0buUedBd    atlasAdmin@admin
-    """
-
     print(f"Running {__name__}.py")
 
-    # User data for connect strings
-    envs = {
-        'local': {
-            'prefix': '',
-            'postfix': '',
-            'cluster': 'localhost:27017/',
-            'server2': '',
-            'users': {
-                'rich': {
-                    'password': 'reddmon',
-                    'databases': [
-                        'admin',
-                        'aggregation_example',
-                        'config',
-                        'local',
-                        'sample_mflix',
-                        'test_database'
-                    ]
-                }
-            }
-        },
-        'Atlas': {
-            'prefix': '+srv',
-            'postfix': '?retryWrites=true&w=majority',
-            'cluster': 'cluster0.yymy7y6.mongodb.net',
-            #'server2': '?retryWrites=true&w=majority&appName=Cluster0',
-            'users': {
-                'rich': {
-                    'password': '9hzGTIA1HjKra6fG',
-                    'databases': [
-                        'admin',
-                        'aggregation_example',
-                        'config',
-                        'local',
-                        'sample_mflix',
-                        'test_database'
-                    ]
-                },
-                'rkba1': {
-                    'password': 'Hiu55xZe0buUedBd',
-                    'databases': [
-                        'admin',
-                        'aggregation_example',
-                        'config',
-                        'local',
-                        'sample_mflix',
-                        'test_database'
-                    ]
-                }
-            }
-        }
-    }
-
+    # For each environment get user databases then authenticate to them one by one
     try:
         # Each environment (local, Atlas) has user dictionaries
-        for env in envs.keys():
-            # print(f"{env}:")
-            
-            # For each user dictionary print user
-            for user in envs[env]['users']:
-                # print(f"{user}:")
+        for env in ['Atlas']: # user_data.keys():
+            print(f"\n*** {env} ***:")
+
+            # For each user show their databases then connect one by one
+            for user in user_data[env]['users']:
+                print(f"{user} connecting to {user_data[env]['host']}")
+
+                uri = f"mongodb{user_data[env]['prefix']}://{user}:{user_data[env]['users'][user]['password']}"\
+                      f"@{user_data[env]['cluster']}/{user_data[env]['postfix']}"
+                print('uri:', uri)
+
+                # Connect to host, get databases then close connection
+                client = MongoClient(uri)
+                databases = client.list_database_names()
+                print(f"{user} {env} databases: {databases}")
+                client.close()
+
                 # For each user show the dictionaries they should have access to
-                for database in envs[env]['users'][user]['databases']:
-                    print(f"{user} connecting to {database}:")
+                for database in databases:
+                    print(f"{user} ** connecting to {env} {database}:")
+                    uri = f"mongodb{user_data[env]['prefix']}://{user}:{user_data[env]['users'][user]['password']}"\
+                          f"@{user_data[env]['cluster']}/{database}{user_data[env]['postfix']}"
 
-                    # client = MongoClient('mongodb://%s:%s@127.0.0.1' % (username, password))
-                    # print(f"{env} prefix {envs[env]['prefix']}:")
-                    # connection_string = "mongodb" + envs[env]['prefix'] + "://" + user + ":" + \
-                    #                     envs[env]['users'][user]['password'] + \
-                    #                     envs[env]['server1'] + database + envs[env]['server2']
-                    uri = f"mongodb{envs[env]['prefix']}://{user}:{envs[env]['users'][user]['password']}"\
-                          f"@{envs[env]['cluster']}/{database}{envs[env]['postfix']}"
-
-                    print('uri:', uri)
-                    #client = MongoClient(uri)
-
-                    # if 'localhost' in str(client.host):
-                    #     uri = 'localhost'
-                    # elif 'atlas' in str(client.host):
-                    #     uri = 'atlas'
-                    # else:
-                    #     print(f"\n*** Unknown host: {client.host} ***")
-                    #     return
-                    #
-                    # print(f"*** Using {uri} client ***")
-
-                    # SCRAM-SHA-256 (RFC 7677)
-                    # client = MongoClient('127.0.0.1',
-                    #                      username=username,
-                    #                      password=password,
-                    #                      authSource=database,
-                    #                      authMechanism='SCRAM-SHA-256')
-                    #
-
+                    # print('uri:', uri)
+                    client = MongoClient(uri)
 
                     # Verify if the connection is successful
                     print(f"{user} connected to {env} {database} database successfully!")
                     # print(client.server_info())
 
-                    # return client
+                    # Now that connected to a database run scripts on it:
+                    basic_operations.run(client, user)  # long time on Atlas
+                    # aggregations.run(client, uri)
+                    print(f"{user} * closing {env} {database}")
+                    client.close()
     except ConnectionFailure as cf:
         print(f"MongoDB Connection Error: {cf}")
         # Handle connection failure (e.g., log, retry, etc.)
@@ -129,5 +64,4 @@ def run():
         print(f"Error connecting to MongoDB: {e}")
         # Handle other exceptions not specific to MongoDB
     finally:
-        pass #client.close()  # Close MongoClient instance if it was successfully created
-        
+        client.close()  # Close MongoClient instance if it was successfully created

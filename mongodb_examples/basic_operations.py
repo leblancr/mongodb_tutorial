@@ -1,3 +1,4 @@
+import traceback
 from datetime import datetime, timezone
 import os
 import bson
@@ -9,24 +10,32 @@ from datetime import datetime  # Import datetime class from datetime module
 from mongo_utils import get_database_names, list_database_names, list_collections
 
 
-def run(client, uri):
+def run(client, user):
+    print(f"Running {__name__}.py")
+
     try:
-        print(f"{uri} databases:")
-        list_database_names(client)
-        database_names = get_database_names(client)
+        # print(f"{user} databases:")
+        # list_database_names(client)
+        # database_names = get_database_names(client)
+        databases = client.list_database_names()
+        print(f"database: {databases}")
         db = client['test_database']
         collections = db.list_collection_names()
-        print(collections)
-        cursor = db['notes']  # Replace 'test_collection' with your actual collection name
+        print(f"test_database collections: {collections}")
 
-        print(f"cursor: {cursor}")
-        for document in cursor.find():
-            pprint(document)
+        for collection in collections:
+            cursor = db[collection]  # Replace 'test_collection' with your actual collection name
+
+            print(f"cursor: {cursor}")
+            print(f"{collection} documents:")
+            for document in cursor.find():
+                pprint(document)
 
         # result = collection.delete_one({'_id': ObjectId('667495007d7b236c50a26a14'), 'test_key': 'test_value'})
         # return
+
         # Print all databases in the client
-        for database_name in database_names:
+        for database_name in get_database_names(client):
             print(f"{database_name} collections:")
             db = client[database_name]
             list_collections(db)
@@ -101,6 +110,8 @@ def run(client, uri):
         print(f"Total Parasite documents in the movies: {document_count}")
     except Exception as e:
         print(f"An error occurred: {e}")
+        print("Traceback:")
+        traceback.print_exc()
 
 
 def insert_document(collection, document):
