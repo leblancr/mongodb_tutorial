@@ -68,3 +68,7 @@ db.createUser(
 
 MongoDB Connection Error: SSL handshake failed:
 add ip to atlas
+
+databases = client.list_database_names()     raise OperationFailure(errmsg, code, response, max_wire_version)
+pymongo.errors.OperationFailure: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+added ?authSource=admin to end of uri to get rich's roles/access info

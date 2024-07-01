@@ -34,19 +34,19 @@ def run(client, user):
         # result = collection.delete_one({'_id': ObjectId('667495007d7b236c50a26a14'), 'test_key': 'test_value'})
         # return
 
-        # Print all databases in the client
-        for database_name in get_database_names(client):
-            print(f"{database_name} collections:")
-            db = client[database_name]
-            list_collections(db)
-
-            # show documents in each collection
-            for collection_name in db.list_collection_names():
-                print(f"{collection_name} documents:")
-                documents = db[collection_name].find()
-
-                for document in documents:
-                    pprint(document)
+        # Print all documents in the client (long tilme)
+        # for database_name in get_database_names(client):
+        #     print(f"{database_name} collections:")
+        #     db = client[database_name]
+        #     list_collections(db)
+        #
+        #     # show documents in each collection
+        #     for collection_name in db.list_collection_names():
+        #         print(f"{collection_name} documents:")
+        #         documents = db[collection_name].find()
+        #
+        #         for document in documents:
+        #             pprint(document)
 
         post = {
             "author": "Mike",
