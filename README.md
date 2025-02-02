@@ -5,21 +5,27 @@ yay -S mongodb-bin
 sudo systemctl status mongodb
 sudo systemctl start mongodb
 sudo systemctl enable mongodb  # start on boot
-mongosh  $
-
 
 To create a MongoDB user account with administrator access [5]:
+1. in /etc/mongodb.conf:
+  #security:
+  security:
+    authorization: "disabled"
 
-$ mongosh
+2. restart service:
+  sudo systemctl restart mongodb
 
-use admin
-db.createUser(
-  {
-    user: "rich",
-    pwd: "reddmon",
-    roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
-  }
-)
+3. $ mongosh
+  use admin
+  admin> db.createUser( { user: 'admin', pwd: 'reddmon', roles: [{ role: 'root', db: 'admin' }] } );
+  { ok: 1 }
+  db.createUser(
+    {
+      user: "rich",
+      pwd: "reddmon",
+      roles: [ { role: "userAdminAnyDatabase", db: "admin" }, "readWriteAnyDatabase" ]
+    }
+  )
 
 mongosh "mongodb://rich:reddmon@localhost:27017"
 
@@ -40,13 +46,29 @@ Atlas:
 u: justin thyme
 p: Q324@
 e: rkba1
-Cluster0
-Your current IP address (172.59.8.51) has been added to enable local connectivity.
+
 database user:
-rkba1
-Hiu55xZe0buUedBd
+rich 9hzGTIA1HjKra6fG
+rkba1 Hiu55xZe0buUedBd
 
 # Install MongoDB Compass from AUR
 yay -S mongodb-compass
 
 
+Troubleshooting:
+dotenv module not found - rerun poetry install
+can't access Atlas -
+db.createUser(
+  {
+    user: 'admin',
+    pwd: 'reddmon',
+    roles: [ { role: 'root', db: 'admin' } ]
+  }
+);
+
+MongoDB Connection Error: SSL handshake failed:
+add ip to atlas
+
+databases = client.list_database_names()     raise OperationFailure(errmsg, code, response, max_wire_version)
+pymongo.errors.OperationFailure: Authentication failed., full error: {'ok': 0.0, 'errmsg': 'Authentication failed.', 'code': 18, 'codeName': 'AuthenticationFailed'}
+added ?authSource=admin to end of uri to get rich's roles/access info

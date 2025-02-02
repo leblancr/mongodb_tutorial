@@ -1,4 +1,5 @@
-import datetime   # This will be needed later
+import traceback
+from datetime import datetime, timezone
 import os
 import bson
 from bson import ObjectId
@@ -6,15 +7,53 @@ from bson import ObjectId
 from pprint import pprint
 from datetime import datetime  # Import datetime class from datetime module
 
-from mongo_utils import get_mongo_client, list_database_names, list_collections, close_client
+from mongo_utils import get_database_names, list_database_names, list_collections
 
 
-def run():
+def run(client, user):
+    print(f"Running {__name__}.py")
+
     try:
-        mongodb_uri = os.environ['MONGODB_URI_ATLAS']
-        client = get_mongo_client(mongodb_uri)
-        print('database_names:')
-        list_database_names(client)
+        # print(f"{user} databases:")
+        # list_database_names(client)
+        # database_names = get_database_names(client)
+        databases = client.list_database_names()
+        print(f"database: {databases}")
+        db = client['test_database']
+        collections = db.list_collection_names()
+        print(f"test_database collections: {collections}")
+
+        for collection in collections:
+            cursor = db[collection]  # Replace 'test_collection' with your actual collection name
+
+            print(f"cursor: {cursor}")
+            print(f"{collection} documents:")
+            for document in cursor.find():
+                pprint(document)
+
+        # result = collection.delete_one({'_id': ObjectId('667495007d7b236c50a26a14'), 'test_key': 'test_value'})
+        # return
+
+        # Print all documents in the client (long tilme)
+        # for database_name in get_database_names(client):
+        #     print(f"{database_name} collections:")
+        #     db = client[database_name]
+        #     list_collections(db)
+        #
+        #     # show documents in each collection
+        #     for collection_name in db.list_collection_names():
+        #         print(f"{collection_name} documents:")
+        #         documents = db[collection_name].find()
+        #
+        #         for document in documents:
+        #             pprint(document)
+
+        post = {
+            "author": "Mike",
+            "text": "My first blog post!",
+            "tags": ["mongodb", "python", "pymongo"],
+            "date": datetime.now(tz=timezone.utc),
+        }
 
         db = client['sample_mflix']  # Get 'sample_mflix' database
         print(f"{db.name} collections:")
@@ -68,10 +107,11 @@ def run():
         document_count = collection.count_documents({"title": "Parasite"})
 
         # Print the count
-        print(f'Total Parasite documents in the movies: {document_count}')
-
+        print(f"Total Parasite documents in the movies: {document_count}")
     except Exception as e:
         print(f"An error occurred: {e}")
+        print("Traceback:")
+        traceback.print_exc()
 
 
 def insert_document(collection, document):
@@ -81,18 +121,4 @@ def insert_document(collection, document):
     # Save the inserted_id of the document you just created:
     document_id = insert_result.inserted_id
     return document_id
-    
-    # # Update the document with the correct year:
-    # update_result = movies.update_one({ '_id': parasite_id }, {
-    #    '$set': {"year": 2019}
-    # })
-    # 
-    # # Print out the updated record to make sure it's correct:
-    # pprint(movies.find_one({'_id': ObjectId(parasite_id)}))
-    
-    # Update *all* the Parasite movie docs to the correct year:
-    # update_result = movies.update_many({"title": "Parasite"}, {"$set": {"year": 2019}})
-    # movies.delete_one(
-    #     {"title": "Parasite",}
-    #  )
     
