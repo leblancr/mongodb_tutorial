@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "mongodb-tutorial"
+name = "mongodb_basic_operations"
 version = "0.1.0"
 description = ""
 authors = ["leblancr <rich.leblanc1@proton.me>"]
