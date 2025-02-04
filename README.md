@@ -1,5 +1,7 @@
 https://www.mongodb.com/developer/languages/python/python-quickstart-crud/
+https://pymongo.readthedocs.io/en/4.11/examples/aggregation.html
 
+This project contains multiple tutorial from the above urls.
 Arch:
 yay -S mongodb-bin
 sudo systemctl status mongodb
